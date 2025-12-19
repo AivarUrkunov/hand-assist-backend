@@ -24,3 +24,22 @@ def send_test():
         raise HTTPException(status_code=500, detail=r.text)
 
     return {"ok": True}
+
+from pydantic import BaseModel
+
+class TaskIn(BaseModel):
+    text: str
+
+@app.post("/task")
+def create_task(task: TaskIn):
+    if not BOT_TOKEN or not CHAT_ID:
+        raise HTTPException(status_code=500, detail="Missing BOT_TOKEN or CHAT_ID")
+
+    url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
+    payload = {"chat_id": CHAT_ID, "text": f"New task: {task.text}"}
+
+    r = requests.post(url, json=payload, timeout=15)
+    if not r.ok:
+        raise HTTPException(status_code=500, detail=r.text)
+
+    return {"ok": True}
