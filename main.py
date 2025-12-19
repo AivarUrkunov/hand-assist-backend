@@ -45,14 +45,24 @@ class TaskIn(BaseModel):
 
 @app.post("/task")
 def create_task(task: TaskIn):
-    if not BOT_TOKEN or not CHAT_ID:
-        raise HTTPException(status_code=500, detail="Missing BOT_TOKEN or CHAT_ID")
+    if not BOT_TOKEN or not CHAT_ID or not ASSIGNEE_CHAT_ID:
+        raise HTTPException(status_code=500, detail="Missing BOT_TOKEN or CHAT_ID or ASSIGNEE_CHAT_ID")
 
     url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
-    payload = {"chat_id": CHAT_ID, "text": f"New task: {task.text}"}
 
-    r = requests.post(url, json=payload, timeout=15)
-    if not r.ok:
-        raise HTTPException(status_code=500, detail=r.text)
+    # 1) Сообщение исполнителю
+    r1 = requests.post(url, json={
+        "chat_id": ASSIGNEE_CHAT_ID,
+        "text": f"New task from manager:\n{task.text}"
+    }, timeout=15)
+
+    # 2) Подтверждение тебе
+    r2 = requests.post(url, json={
+        "chat_id": CHAT_ID,
+        "text": f"Assigned to executor:\n{task.text}"
+    }, timeout=15)
+
+    if (not r1.ok) or (not r2.ok):
+        raise HTTPException(status_code=500, detail=f"assignee:{r1.text} manager:{r2.text}")
 
     return {"ok": True}
