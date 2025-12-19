@@ -18,6 +18,7 @@ app.add_middleware(
 
 BOT_TOKEN = os.getenv("BOT_TOKEN")
 CHAT_ID = os.getenv("CHAT_ID")
+ASSIGNEE_CHAT_ID = os.getenv("ASSIGNEE_CHAT_ID")
 
 @app.get("/")
 def root():
