@@ -66,3 +66,12 @@ def create_task(task: TaskIn):
         raise HTTPException(status_code=500, detail=f"assignee:{r1.text} manager:{r2.text}")
 
     return {"ok": True}
+
+@app.get("/debug_env")
+def debug_env():
+    return {
+        "CHAT_ID": CHAT_ID,
+        "ASSIGNEE_CHAT_ID": ASSIGNEE_CHAT_ID,
+        "has_token": bool(BOT_TOKEN),
+    }
+
